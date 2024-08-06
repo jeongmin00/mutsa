@@ -1,0 +1,504 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Page</title>
+    <style>
+        .body {
+            display: flex;
+            width: 100%;
+            position: relative;
+            margin:0;
+        }
+
+        .main {
+            display: block;
+            flex-grow: 1;
+            height: 100%;
+        }
+
+        .nav ul {
+            list-style-type: none;
+            padding-left: 0px;
+        }
+
+        .button {
+            background-color: #d9d9d9;
+        }
+
+        .profileImg {
+            /* Add your styles for the profile image here */
+        }
+
+        .profileEdit {
+            padding: 2rem;
+            color: #E0E0E0;
+            background-color: #5E5E5E;
+            position: relative;
+            left: 25%;
+            margin-top: 2rem;
+        }
+
+        .profileEdit>div {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .profileInput {
+            position: relative;
+            width: 100%;
+        }
+
+        .profileInput input {
+            width: 100%;
+            left: 0;
+        }
+
+        .body .nav .ul li:hover {
+            background-color: #d9d9d9;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modalContent {
+            background-color: #fff;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+        }
+
+        .modalClose {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .modalClose:hover,
+        .modalClose:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .nav {
+            background-image: url("../resources/static/images/mypageinfo/Group200.png");
+            background-size: contain;
+            background-repeat: no-repeat;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .nav h3,
+        .nav ul {
+            position: relative;
+            width: 100%;
+            top: 25%;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .nav ul li span {
+            position: relative;
+            left: 30%;
+            font-weight: 300;
+        }
+
+        .nav ul li img {
+            position: relative;
+            display: inline-block;
+            left: 25%;
+        }
+
+        .nav h3 {
+            left: 25%;
+            padding: 0;
+        }
+
+        .button {
+            display: block;
+            padding: 1rem 2rem;
+            font-weight: 700;
+            position: relative;
+            left: 35rem;
+        }
+
+        .passwordEdit {
+            position: relative;
+            left: 25%;
+            margin-top: 2rem;
+            background-color: #5E5E5E;
+            color: white;
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .passwordEdit>div {
+            width: 50%;
+            padding: 1rem;
+        }
+
+        .passwordEdit>div input {
+            left: 0;
+            margin-top: 1rem;
+            width: 100%;
+        }
+
+        .passwordEdit>button {
+            width: 100px;
+            height: 50px;
+            position: absolute;
+            bottom: 3rem;
+            right: 1rem;
+            background-color: #d9d9d9;
+            color: black;
+        }
+        .main{
+            background-color: #2c2c2c;
+        }
+    </style>
+</head>
+
+<body>
+<div class="body">
+    <nav class="nav">
+        <h3>마이 페이지</h3>
+        <ul class="ul">
+            <li onclick="setSelectedTab('info')">
+                <img src="./images/mypageinfo/outline & logos/home.png" alt="홈 아이콘"> <span>내 정보</span>
+            </li>
+            <li onclick="setSelectedTab('memorial')">
+                <img src="./images/mypageinfo/outline & logos/users.png" alt="유저 아이콘"> <span> 추모 공간</span>
+            </li>
+        </ul>
+    </nav>
+
+    <main class="main">
+        <div id="content"></div>
+    </main>
+
+    <div id="modal" class="modal">
+        <div class="modalContent">
+            <span class="modalClose" onclick="closeModal()">&times;</span>
+            <h2>To-Do 수정</h2>
+            <div>
+                <label for="modalUser">사용자</label>
+                <input id="modalUser" name="user" value="">
+            </div>
+            <div>
+                <label for="modalDate">게시일</label>
+                <input id="modalDate" name="date" type="date" value="">
+            </div>
+            <div>
+                <label for="modalTitle">내용</label>
+                <input id="modalTitle" name="title" value="">
+            </div>
+            <button onclick="updateTodo()">저장</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let name = "";
+    let email = "";
+    let error = "";
+    let selectedTab = "info";
+    let currentPassword = "";
+    let newPassword = "";
+    let confirmNewPassword = "";
+    let todoList = [];
+    let newTodo = "";
+    let isModalOpen = false;
+    let currentTodo = null;
+
+    const navRef = document.querySelector('.nav');
+    const mainRef = document.querySelector('.main');
+    const contentRef = document.getElementById('content');
+    const modalRef = document.getElementById('modal');
+    const modalUserRef = document.getElementById('modalUser');
+    const modalDateRef = document.getElementById('modalDate');
+    const modalTitleRef = document.getElementById('modalTitle');
+
+    const ImageUpload = () => {
+        let uploadImgUrl = "images/mypageinfo/Group120.png";
+
+        const onchangeImageUpload = (e) => {
+            const { files } = e.target;
+            const uploadFile = files[0];
+            const reader = new FileReader();
+            reader.readAsDataURL(uploadFile);
+            reader.onloadend = () => {
+                uploadImgUrl = reader.result;
+                document.getElementById('profileImg').src = uploadImgUrl;
+            };
+        };
+
+        return `
+                <label for="upload" style="cursor: pointer;">
+                    <img id="profileImg" src="${uploadImgUrl}" alt="img" style="width: 150px; height: 150px; object-fit: cover; border-radius: 50%;"></img>
+                </label>
+                <input id="upload" type="file" accept="image/*" onchange="(${onchangeImageUpload.toString()})(event)" style="display: none;" />
+            `;
+    };
+
+    const fetchUser = async () => {
+        const token = localStorage.getItem("token");
+        if (token) {
+            try {
+                const response = await fetch("/api/login", {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                const data = await response.json();
+                name = data.username;
+                email = data.email;
+                renderContent();
+            } catch (err) {
+                error = "Unauthorized";
+            }
+        }
+    };
+
+    const fetchTodos = async () => {
+        try {
+            const response = await fetch("/api/memorial"); // 추모공간 생성 api
+            const data = await response.json();
+            todoList = data;
+            renderContent();
+        } catch (err) {
+            error = "Failed to fetch todos";
+        }
+    };
+
+    fetchUser();
+    fetchTodos();
+
+    const img = new Image();
+    img.src = "images/mypageinfo/Group200.png";
+    img.onload = () => {
+        const navWidth = img.width;
+        const navHeight = img.height;
+        navRef.style.width = `${navWidth}px`;
+        navRef.style.height = `${navHeight}px`;
+
+        const mainWidth = window.innerWidth - navWidth;
+        mainRef.style.width = `${mainWidth}px`;
+        mainRef.style.height = `${navHeight}px`;
+    };
+
+    const profileEdit = async (e) => {
+        e.preventDefault();
+        const token = localStorage.getItem("token");
+        try {
+            await fetch("/api/me", { //마이페이지 수정 api
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ username: name, email, uploadImgUrl }),
+            });
+            alert("Profile updated successfully!");
+        } catch (err) {
+            error = "Failed to update profile";
+        }
+    };
+
+    const changePassword = async (e) => {
+        e.preventDefault();
+        if (newPassword !== confirmNewPassword) {
+            error = "New passwords do not match";
+            renderContent();
+            return;
+        }
+
+        const token = localStorage.getItem("token");
+        try {
+            await fetch("/api/change-password", { // 비밀번호 변경 api
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ currentPassword, newPassword }),
+            });
+            error = "";
+            alert("Password changed successfully!");
+        } catch (err) {
+            error = "Failed to change password";
+        }
+    };
+
+    const addTodo = async () => {
+        const newTodoItem = {
+            title: newTodo,
+            user: name,
+            date: new Date().toISOString().split("T")[0],
+        };
+
+        try {
+            const response = await fetch("/api/memorial", { // 추모공간 생성 api
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(newTodoItem),
+            });
+            const data = await response.json();
+            todoList.push(data);
+            newTodo = "";
+            renderContent();
+        } catch (err) {
+            error = "Failed to add todo";
+            renderContent();
+        }
+    };
+
+    const updateTodo = async () => {
+        try {
+            await fetch(`/api/memorial/${currentTodo.id}`, { // 추모공간 수정 api
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(currentTodo),
+            });
+            todoList = todoList.map((todo) => (todo.id === currentTodo.id ? currentTodo : todo));
+            closeModal();
+            renderContent();
+        } catch (err) {
+            error = "Failed to update todo";
+            renderContent();
+        }
+    };
+
+    const deleteTodo = async (id) => {
+        try {
+            await fetch(`/api/memorials/${id}`, { // 추모공간 삭제 api
+                method: "DELETE",
+            });
+            todoList = todoList.filter((todo) => todo.id !== id);
+            renderContent();
+        } catch (err) {
+            error = "Failed to delete todo";
+            renderContent();
+        }
+    };
+
+    const openModal = (todo) => {
+        currentTodo = { ...todo };
+        isModalOpen = true;
+        modalUserRef.value = currentTodo.user;
+        modalDateRef.value = currentTodo.date;
+        modalTitleRef.value = currentTodo.title;
+        modalRef.style.display = "flex";
+    };
+
+    const closeModal = () => {
+        isModalOpen = false;
+        currentTodo = null;
+        modalRef.style.display = "none";
+    };
+
+    const handleTodoChange = (e) => {
+        const { name, value } = e.target;
+        currentTodo = { ...currentTodo, [name]: value };
+    };
+
+    const setSelectedTab = (tab) => {
+        selectedTab = tab;
+        renderContent();
+    };
+
+    const renderContent = () => {
+        if (selectedTab === "info") {
+            contentRef.innerHTML = `
+                    <div style="width: 70%;">
+                        <div class="profileEdit">
+                            <h2>프로필 정보 설정</h2>
+                            <div>
+                                <div>
+                                    ${ImageUpload()}
+                                </div>
+                                <div class="profileInput">
+                                    <label for="name">이름</label>
+                                    <input size="60" id="name" value="${name}" oninput="name = this.value">
+                                    <label for="email">이메일</label>
+                                    <input type="email" id="email" value="${email}" oninput="email = this.value">
+                                </div>
+                            </div>
+                            <button onclick="profileEdit(event)" class="button" style="color: black;">
+                                저장
+                            </button>
+                        </div>
+                        <div class="passwordEdit">
+                            <div>
+                                <label for="currentPassword">현재 비밀번호</label>
+                                <input size="10" type="password" id="currentPassword" value="${currentPassword}" oninput="currentPassword = this.value">
+                            </div>
+                            <div>
+                                <label for="newPassword">새로운 비밀번호</label>
+                                <input type="password" id="newPassword" value="${newPassword}" oninput="newPassword = this.value">
+                            </div>
+                            <div>
+                                <label for="confirmNewPassword">비밀번호 재입력</label>
+                                <input type="password" id="confirmNewPassword" value="${confirmNewPassword}" oninput="confirmNewPassword = this.value">
+                            </div>
+                            <button onclick="changePassword(event)">변경</button>
+                        </div>
+                    </div>
+                `;
+        } else if (selectedTab === "memorial") {
+            contentRef.innerHTML = `
+                    <div>
+                        <h2>추모 공간</h2>
+                        <div>
+                            <h3>To-Do List</h3>
+                            <ul>
+                                ${todoList.map(todo => `
+                                    <li key="${todo.id}">
+                                        <p>사용자: ${todo.user}</p>
+                                        <p>게시일: ${todo.date}</p>
+                                        <p>내용: ${todo.title}</p>
+                                        <button onclick="openModal(${JSON.stringify(todo)})">수정</button>
+                                        <button onclick="deleteTodo(${todo.id})">삭제</button>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                            <input type="text" value="${newTodo}" oninput="newTodo = this.value" placeholder="새로운 할 일 추가">
+                            <button onclick="addTodo()">추가</button>
+                            ${error ? `<p class="error">${error}</p>` : ''}
+                        </div>
+                    </div>
+                `;
+        }
+    };
+
+    renderContent();
+</script>
+</body>
+
+</html>

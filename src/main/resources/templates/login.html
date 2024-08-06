@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        * {
+            margin: 0;
+        }
+
+        main {
+            width: 100%;
+            display: flex;
+            background-color: #2c2c2c;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        .logo {}
+
+        form {
+            width: 100%;
+            position: relative;
+            top: 25%;
+            left: 25%;
+        }
+
+        .box {
+            color: white;
+            width: 50%;
+        }
+
+        img {
+            object-fit: cover;
+            object-position: 0 0;
+        }
+
+        label {
+            display: block;
+        }
+
+        input {
+            display: inline-block;
+        }
+
+        span {
+            font-weight: lighter;
+            color: white;
+            margin-right: 1rem;
+        }
+
+        label,
+        h1 {
+            text-align: left;
+        }
+
+        .submitBtn {
+            color: white;
+            background-color: #5e5e5e;
+        }
+
+        button {
+            color: white;
+            border: none;
+            background-color: #2c2c2c;
+        }
+
+        button:hover {
+            cursor: pointer;
+        }
+
+        h1 {
+            margin-bottom: 3rem;
+        }
+
+        hr {
+            border: 0;
+            height: 1px;
+            background-color: white;
+            width: 50%;
+            margin: 20px auto;
+            margin-right: 300rem;
+        }
+    </style>
+</head>
+
+<body>
+<main>
+    <div class="logo">
+        <img src="/images/login.png" alt="로고 이미지" class="logoImg"> <!-- 경로를 실제 이미지 경로로 변경 -->
+    </div>
+    <div class="box">
+        <form id="loginForm">
+            <h1>로그인</h1>
+            <label for="email">이메일</label>
+            <input id="email" type="email" placeholder="이메일">
+            <label for="password">비밀번호</label>
+            <input id="password" type="password" placeholder="비밀번호">
+            <br>
+            <input id="loginSubmit" type="submit" value="로그인" class="submitBtn">
+            <hr>
+            <div>
+                <span>또보자가 처음이에요</span>
+                <button id="registerBtn" type="button">가입하기</button>
+            </div>
+        </form>
+    </div>
+</main>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const loginForm = document.getElementById("loginForm");
+        const emailInput = document.getElementById("email");
+        const passwordInput = document.getElementById("password");
+        const registerBtn = document.getElementById("registerBtn");
+
+        const navigate = (url) => {
+            window.location.href = url;
+        };
+
+        loginForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const email = emailInput.value;
+            const password = passwordInput.value;
+
+            try {
+                const response = await fetch("/api/login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password,
+                    }),
+                });
+
+                if (response.ok) {
+                    navigate("/");
+                } else {
+                    navigate("/members/new");
+                }
+            } catch (error) {
+                console.error("Error during login:", error);
+                navigate("/members/new");
+            }
+        });
+
+        registerBtn.addEventListener("click", () => {
+            navigate("/members/new");
+        });
+    });
+</script>
+</body>
+
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Page</title>
+    <style>
+        .imgBox {
+            width: 100%;
+            margin: 0;
+            height: 100%;
+        }
+        .imgBox img {
+            margin: 0;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+<div class="main-content">
+    <div id="navbar"></div>
+    <main>
+        <img src="/images/main/Group 197.png" alt="Image 197">
+        <img src="/images/main/Group 195.png" alt="Image 195">
+
+        <div class="imgBox" style="text-align: center; background-color: #2C2C2C;">
+            <img src="/images/main/Group 196.png" alt="Image 196">
+        </div>
+
+        <div class="imgBox">
+            <img src="/images/main/Group 194.png" alt="Image 194">
+            <img src="/images/main/Group 193.png" alt="Image 193">
+        </div>
+    </main>
+    <div id="footer"></div>
+</div>
+<script src="/js/navbar.js" type="module"></script>
+<script src="/js/footer.js" type="module"></script>
+<script type="module">
+    import { createNavbar } from './js/navbar.js';
+    import { createFooter } from './js/footer.js';
+
+    createNavbar();
+    createFooter();
+</script>
+</body>
+</html>

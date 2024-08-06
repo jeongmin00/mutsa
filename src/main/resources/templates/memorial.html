@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo Application</title>
+</head>
+<body>
+<div class="main-content">
+    <div id="navbar"></div>
+    <main>
+        <!-- 응답 데이터를 표시할 부분 -->
+        <div id="resultContainer">
+            <!-- 서버 응답 데이터를 여기에 추가합니다 -->
+        </div>
+
+        <!-- Todo 작성 영역 -->
+        <div class="todo-container">
+            <form id="todoForm">
+                <label for="todoText">할 일</label>
+                <input type="text" id="todoText" name="todoText" required>
+                <label for="todoImage">이미지 업로드</label>
+                <input type="file" id="todoImage" name="todoImage" required>
+                <input type="submit" value="생성">
+            </form>
+        </div>
+
+        <!-- Todo 리스트를 표시할 영역 -->
+        <div id="todoList">
+            <!-- Todo 아이템이 여기에 추가됩니다 -->
+        </div>
+    </main>
+    <div id="footer"></div>
+</div>
+
+<script>
+    document.getElementById('todoForm').addEventListener('submit', function (e) {
+        e.preventDefault(); // 기본 폼 제출 방지
+
+        const formData = new FormData(this);
+
+        fetch('/api/memorial', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log('성공:', data);
+
+                // Check if data has expected properties
+                if (!data.todoText || !data.todoImage) {
+                    console.error('Unexpected response structure:', data);
+                    return;
+                }
+
+                // Todo 항목을 표시할 HTML 생성
+                const todoItem = document.createElement('div');
+                todoItem.classList.add('todo-item');
+                todoItem.innerHTML = `
+                        <div><strong>${data.todoText}</strong></div>
+                        <img src="data:image/png;base64,${data.todoImage}" alt="Todo 이미지">
+                        <div class="comments">
+                            <div class="comments-list"></div>
+                            <form class="comment-form">
+                                <input type="text" name="commentText" placeholder="댓글 작성" required>
+                                <input type="submit" value="댓글 추가">
+                            </form>
+                        </div>
+                    `;
+                document.getElementById('todoList').appendChild(todoItem);
+
+                // Load existing comments
+                loadComments(data.id, todoItem.querySelector('.comments-list'));
+
+                // Add event listener to the new comment form
+                const commentForm = todoItem.querySelector('.comment-form');
+                commentForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    const commentText = commentForm.commentText.value;
+                    addComment(data.id, commentText, todoItem.querySelector('.comments-list'));
+                    commentForm.reset();
+                });
+            })
+            .catch((error) => {
+                console.error('오류:', error);
+            });
+    });
+
+    // 페이지 로드 시 기존 Todo 목록을 가져와서 표시
+    document.addEventListener('DOMContentLoaded', function () {
+        fetch('/api/memorial')
+            .then(response => response.json())
+            .then(data => {
+                console.log('기존 목록:', data);
+                data.forEach(item => {
+                    if (!item.todoText || !item.todoImage) {
+                        console.error('Unexpected item structure:', item);
+                        return;
+                    }
+                    const todoItem = document.createElement('div');
+                    todoItem.classList.add('todo-item');
+                    todoItem.innerHTML = `
+                            <div><strong>${item.todoText}</strong></div>
+                            <img src="data:image/png;base64,${item.todoImage}" alt="Todo 이미지">
+                            <div class="comments">
+                                <div class="comments-list"></div>
+                                <form class="comment-form">
+                                    <input type="text" name="commentText" placeholder="댓글 작성" required>
+                                    <input type="submit" value="댓글 추가">
+                                </form>
+                            </div>
+                        `;
+                    document.getElementById('todoList').appendChild(todoItem);
+
+                    // Load existing comments
+                    loadComments(item.id, todoItem.querySelector('.comments-list'));
+
+                    // Add event listener to the new comment form
+                    const commentForm = todoItem.querySelector('.comment-form');
+                    commentForm.addEventListener('submit', function (e) {
+                        e.preventDefault();
+                        const commentText = commentForm.commentText.value;
+                        addComment(item.id, commentText, todoItem.querySelector('.comments-list'));
+                        commentForm.reset();
+                    });
+                });
+            })
+            .catch((error) => {
+                console.error('오류:', error);
+            });
+    });
+
+    function loadComments(memorialId, commentsList) {
+        fetch(`/api/memorials/${memorialId}/comments`)
+            .then(response => response.json())
+            .then(comments => {
+                comments.forEach(comment => {
+                    const commentItem = document.createElement('div');
+                    commentItem.classList.add('comment-item');
+                    commentItem.textContent = comment.text;
+                    commentsList.appendChild(commentItem);
+                });
+            })
+            .catch(error => {
+                console.error('댓글 로드 오류:', error);
+            });
+    }
+
+    function addComment(memorialId, commentText, commentsList) {
+        fetch(`/api/memorials/${memorialId}/comments`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ text: commentText })
+        })
+            .then(response => response.json())
+            .then(comment => {
+                const commentItem = document.createElement('div');
+                commentItem.classList.add('comment-item');
+                commentItem.textContent = comment.text;
+                commentsList.appendChild(commentItem);
+            })
+            .catch(error => {
+                console.error('댓글 추가 오류:', error);
+            });
+    }
+</script>
+</body>
+</html>
